@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>JEE College Predictor</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#f4f6f9;
+text-align:center;
+margin:0;
+}
+
+.container{
+margin-top:40px;
+}
+
+h1{
+color:#333;
+}
+
+select,input{
+padding:10px;
+margin:6px;
+font-size:14px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+button{
+padding:10px 18px;
+margin:8px;
+background:#007bff;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+button:hover{
+background:#0056b3;
+}
+
+.card{
+background:white;
+margin:15px auto;
+padding:15px;
+width:60%;
+border-radius:8px;
+box-shadow:0px 2px 6px rgba(0,0,0,0.2);
+text-align:left;
+}
+
+.loading{
+color:#555;
+font-size:18px;
+margin-top:20px;
+}
+
+.noresult{
+color:red;
+font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>JEE College Predictor</h1>
+
+<input type="number" id="rank" placeholder="Enter JEE Rank">
+
+<br>
+
+<select id="branch">
+<option value="All">All Branches</option>
+<option value="Computer">Computer</option>
+<option value="Mechanical">Mechanical</option>
+<option value="Electrical">Electrical</option>
+<option value="Civil">Civil</option>
+</select>
+
+<select id="category">
+<option value="All">All Categories</option>
+<option value="OPEN">OPEN</option>
+<option value="OBC">OBC</option>
+<option value="SC">SC</option>
+<option value="ST">ST</option>
+<option value="EWS">EWS</option>
+</select>
+
+<select id="institute">
+<option value="All">All Institutes</option>
+<option value="IIT">IIT</option>
+<option value="NIT">NIT</option>
+<option value="IIIT">IIIT</option>
+</select>
+
+<br>
+
+<button onclick="predict()">Predict Colleges</button>
+<button onclick="resetForm()">Reset</button>
+
+<div id="result"></div>
+
+</div>
+
+<script>
+
+function predict(){
+
+let rank = document.getElementById("rank").value;
+let branch = document.getElementById("branch").value;
+let category = document.getElementById("category").value;
+let institute = document.getElementById("institute").value;
+
+if(rank === ""){
+alert("Please enter your JEE rank");
+return;
+}
+
+document.getElementById("result").innerHTML =
+"<div class='loading'>Loading colleges...</div>";
+
+fetch(`/predict?rank=${rank}&branch=${branch}&category=${category}&institute=${institute}`)
+
+.then(res => res.json())
+
+.then(data => {
+
+let output = "<h2>Possible Colleges</h2>";
+
+if(data.length === 0){
+output += "<p class='noresult'>No colleges found for this filter.</p>";
+}
+else{
+
+data.forEach(c => {
+
+output += `
+<div class="card">
+<h3>${c["Institute"]}</h3>
+<p><b>Program:</b> ${c["Academic Program Name"]}</p>
+<p><b>Closing Rank:</b> ${c["Closing Rank"]}</p>
+</div>
+`;
+
+});
+
+}
+
+document.getElementById("result").innerHTML = output;
+
+})
+
+.catch(error => {
+
+document.getElementById("result").innerHTML =
+"<p class='noresult'>Error loading data</p>";
+
+console.error(error);
+
+});
+
+}
+
+
+function resetForm(){
+
+document.getElementById("rank").value="";
+document.getElementById("branch").value="All";
+document.getElementById("category").value="All";
+document.getElementById("institute").value="All";
+document.getElementById("result").innerHTML="";
+
+}
+
+</script>
+
+</body>
+</html>
