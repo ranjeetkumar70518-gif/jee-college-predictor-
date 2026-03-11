@@ -1,11 +1,14 @@
 from flask import Flask, request, jsonify, render_template
 import pandas as pd
+import os
 
 app = Flask(__name__)
 
-# Excel read (header row = 2)
-data = pd.read_excel("Book1.xlsx", header=1)
-# Remove spaces in column names
+# Load Excel file
+file_path = "Book1.xlsx"
+data = pd.read_excel(file_path, header=1)
+
+# Clean column names
 data.columns = data.columns.str.strip()
 
 # Convert ranks to numbers
@@ -16,11 +19,13 @@ print("Columns detected:", data.columns)
 print("Total rows:", len(data))
 
 
+# Home page
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
+# Prediction API
 @app.route("/predict")
 def predict():
 
@@ -64,10 +69,12 @@ def predict():
 
     print("Colleges found:", len(result))
 
-    colleges = result[["Institute","Academic Program Name","Closing Rank"]]
+    colleges = result[["Institute", "Academic Program Name", "Closing Rank"]]
 
     return jsonify(colleges.to_dict(orient="records"))
 
 
+# Run server (for Render deployment)
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
